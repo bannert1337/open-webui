@@ -55,6 +55,8 @@
 	let isEditing = false;
 
 	let filteredChatList = [];
+	let loadedChats = 20; // Initial number of chats to load
+	let loading = false;
 
 	$: filteredChatList = $chats.filter((chat) => {
 		if (search === '') {
@@ -76,6 +78,23 @@
 		}
 	});
 
+	const loadMoreChats = () => {
+		if (!loading) {
+			loading = true;
+			setTimeout(() => {
+				loadedChats += 20;
+				loading = false;
+			}, 500); // Simulating an async loading delay
+		}
+	};
+
+	const handleScroll = (event) => {
+		const { scrollTop, clientHeight, scrollHeight } = event.target;
+		if (scrollTop + clientHeight >= scrollHeight - 100) {
+			loadMoreChats();
+		}
+	};
+
 	mobile;
 	const onResize = () => {
 		if ($showSidebar && window.innerWidth < BREAKPOINT) {
@@ -95,7 +114,9 @@
 		});
 
 		showSidebar.set(window.innerWidth > BREAKPOINT);
-		await chats.set(await getChatList(localStorage.token));
+		const initialChats = await getChatList(localStorage.token);
+		await chats.set(initialChats);
+		enrichChatsWithContent(initialChats, 0, loadedChats);
 
 		let touchstart;
 		let touchend;
@@ -133,9 +154,9 @@
 	});
 
 	// Helper function to fetch and add chat content to each chat
-	const enrichChatsWithContent = async (chatList) => {
+	const enrichChatsWithContent = async (chatList, startIndex, endIndex) => {
 		const enrichedChats = await Promise.all(
-			chatList.map(async (chat) => {
+			chatList.slice(startIndex, endIndex).map(async (chat) => {
 				const chatDetails = await getChatById(localStorage.token, chat.id).catch((error) => null); // Handle error or non-existent chat gracefully
 				if (chatDetails) {
 					chat.chat = chatDetails.chat; // Assuming chatDetails.chat contains the chat content
@@ -144,7 +165,13 @@
 			})
 		);
 
-		await chats.set(enrichedChats);
+		chats.update((prevChats) => {
+			const updatedChats = [...prevChats];
+			enrichedChats.forEach((chat, index) => {
+				updatedChats[startIndex + index] = chat;
+			});
+			return updatedChats;
+		});
 	};
 
 	const loadChat = async (id) => {
@@ -434,8 +461,8 @@
 				</div>
 			{/if}
 
-			<div class="pl-2 my-2 flex-1 flex flex-col space-y-1 overflow-y-auto scrollbar-hidden">
-				{#each filteredChatList as chat, idx}
+			<div class="pl-2 my-2 flex-1 flex flex-col space-y-1 overflow-y-auto scrollbar-hidden" on:scroll={handleScroll}>
+				{#each filteredChatList.slice(0, loadedChats) as chat, idx}
 					{#if idx === 0 || (idx > 0 && chat.time_range !== filteredChatList[idx - 1].time_range)}
 						<div
 							class="w-full pl-2.5 text-xs text-gray-500 dark:text-gray-500 font-medium {idx === 0
