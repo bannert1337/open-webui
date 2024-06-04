@@ -24,6 +24,15 @@ export const capitalizeFirstLetter = (string) => {
 	return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
+export function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export const splitStream = (splitOn) => {
 	let buffer = '';
 	return new TransformStream({

@@ -37,6 +37,8 @@
 	import Spinner from '$lib/components/common/Spinner.svelte';
 	import WebSearchResults from './ResponseMessage/WebSearchResults.svelte';
 
+	import { escapeHtml } from '$lib/utils';
+
 	export let message;
 	export let siblings;
 
@@ -148,7 +150,7 @@
                     approximate_total: ${approximateToHumanReadable(message.info.total_duration)}`;
 			}
 			tooltipInstance = tippy(`#info-${message.id}`, {
-				content: `<span class="text-xs" id="tooltip-${message.id}">${tooltipContent}</span>`,
+				content: `<span class="text-xs" id="tooltip-${message.id}">${sanitizeTooltipContent(tooltipContent)}</span>`,
 				allowHTML: true
 			});
 		}
@@ -484,7 +486,7 @@
 											/>
 										{/if}
 									{:else}
-										{@html marked.parse(token.raw, {
+										{@html renderMarked(token.raw, {
 											...defaults,
 											gfm: true,
 											breaks: true,
