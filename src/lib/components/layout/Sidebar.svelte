@@ -325,6 +325,9 @@
 					on:click={() => {
 						selectedChatId = null;
 						chatId.set('');
+						if ($mobile) {
+							showSidebar.set(false);
+						}
 					}}
 					draggable="false"
 				>
