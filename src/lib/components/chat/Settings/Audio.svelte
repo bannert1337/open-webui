@@ -16,8 +16,9 @@
 	let OpenAIKey = '';
 	let OpenAISpeaker = '';
 
-	let STTEngines = ['', 'openai'];
+	let STTEngines = ['', 'openai', 'whisper-openai'];
 	let STTEngine = '';
+	let STTModel = '';
 
 	let conversationMode = false;
 	let speechAutoSend = false;
@@ -144,6 +145,7 @@
 		saveSettings({
 			audio: {
 				STTEngine: STTEngine !== '' ? STTEngine : undefined,
+				STTModel: STTModel !== '' ? STTModel : undefined,
 				TTSEngine: TTSEngine !== '' ? TTSEngine : undefined,
 				speaker:
 					(TTSEngine === 'openai' ? OpenAISpeaker : speaker) !== ''
@@ -162,7 +164,7 @@
 		<div>
 			<div class=" mb-1 text-sm font-medium">{$i18n.t('STT Settings')}</div>
 
-			<div class=" py-0.5 flex w-full justify-between">
+			<div class=" py-0.5 flex w/full justify-between">
 				<div class=" self-center text-xs font-medium">{$i18n.t('Speech-to-Text Engine')}</div>
 				<div class="flex items-center relative">
 					<select
@@ -184,9 +186,24 @@
 					>
 						<option value="">{$i18n.t('Default (Web API)')}</option>
 						<option value="whisper-local">{$i18n.t('Whisper (Local)')}</option>
+						<option value="whisper-openai">{$i18n.t('Whisper (OpenAI)')}</option>
 					</select>
 				</div>
 			</div>
+
+			{#if STTEngine === 'whisper-openai'}
+				<div class=" py-0.5 flex w-full justify-between">
+					<div class=" self-center text-xs font-medium">{$i18n.t('STT Model Name')}</div>
+					<div class="flex items-center relative">
+						<input
+							class="dark:bg-gray-900 w-full rounded px-2 p-1 text-xs bg-transparent outline-none"
+							bind:value={STTModel}
+							placeholder="Enter STT model name"
+							required
+						/>
+					</div>
+				</div>
+			{/if}
 
 			<div class=" py-0.5 flex w-full justify-between">
 				<div class=" self-center text-xs font-medium">{$i18n.t('Conversation Mode')}</div>

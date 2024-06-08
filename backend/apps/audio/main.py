@@ -170,6 +170,7 @@ async def speech(request: Request, user=Depends(get_verified_user)):
 @app.post("/transcriptions")
 def transcribe(
     file: UploadFile = File(...),
+    model: str = Form(...),
     user=Depends(get_current_user),
 ):
     log.info(f"file.content_type: {file.content_type}")
@@ -189,7 +190,7 @@ def transcribe(
             f.close()
 
         whisper_kwargs = {
-            "model_size_or_path": WHISPER_MODEL,
+            "model_size_or_path": model,
             "device": whisper_device_type,
             "compute_type": "int8",
             "download_root": WHISPER_MODEL_DIR,

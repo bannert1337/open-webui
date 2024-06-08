@@ -386,6 +386,41 @@ export const generateTitle = async (
 	return res?.choices[0]?.message?.content.replace(/["']/g, '') ?? 'New Chat';
 };
 
+export const transcribe = async (
+	token: string = '',
+	file: File,
+	model: string = 'whisper-1'
+) => {
+	let error = null;
+
+	const formData = new FormData();
+	formData.append('file', file);
+	formData.append('model', model);
+
+	const res = await fetch(`${OPENAI_API_BASE_URL}/transcriptions`, {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${token}`
+		},
+		body: formData
+	})
+		.then(async (res) => {
+			if (!res.ok) throw await res.json();
+			return res.json();
+		})
+		.catch((err) => {
+			console.log(err);
+			error = err;
+			return null;
+		});
+
+	if (error) {
+		throw error;
+	}
+
+	return res;
+};
+
 export const generateSearchQuery = async (
 	token: string = '',
 	model: string,
